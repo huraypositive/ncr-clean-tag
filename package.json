@@ -1,0 +1,18 @@
+{
+  "name": "ncr-clean-tag",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "start": "node app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "hurayChan",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^16.0.3"
+  }
+}
