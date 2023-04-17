@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"github.com/joho/godotenv"
+  "nct/config"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
@@ -38,6 +39,13 @@ func init() {
 func makeApiSpec() *ApiSpec {
 	var apiSpec ApiSpec
 	return &apiSpec
+}
+
+func getFlagConfig(cmd string) *config.Flag {
+  flagConfig := config.Flag{}
+  flags := flagConfig.Setup(&cmd)
+  flagConfig.Parse(flags,os.Args[2:])
+  return &flagConfig
 }
 
 func sendRequest(apiSpec *ApiSpec) (*[]byte, error) {
