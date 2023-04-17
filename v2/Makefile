@@ -15,9 +15,14 @@ vet: fmt
 .PHONY:vet
 
 build: vet
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build/nct -ldflags "-s -w -X main.command=${COMMAND} -X main.version=${GIT_VER}"
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build/nct-linux-amd64 -ldflags "-s -w -X main.command=${COMMAND} -X main.version=${GIT_VER}"
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o build/nct-windows-amd64 -ldflags "-s -w -X main.command=${COMMAND} -X main.version=${GIT_VER}"
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o build/nct-darwin-amd64 -ldflags "-s -w -X main.command=${COMMAND} -X main.version=${GIT_VER}"
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o build/nct-linux-arm64 -ldflags "-s -w -X main.command=${COMMAND} -X main.version=${GIT_VER}"
+	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o build/nct-windows-arm64 -ldflags "-s -w -X main.command=${COMMAND} -X main.version=${GIT_VER}"
+	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o build/nct-darwin-arm64 -ldflags "-s -w -X main.command=${COMMAND} -X main.version=${GIT_VER}"
 .PHONY:build
 
 install:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install -ldflags "-s -w -X main.command=${COMMAND} -X main.version=${GIT_VER}"
+	CGO_ENABLED=0 go install -ldflags "-s -w -X main.command=${COMMAND} -X main.version=${GIT_VER}"
 .PHONY:install
