@@ -24,9 +24,11 @@ type ApiSpec struct {
 }
 
 func init() {
-  err := godotenv.Load()
-  if err != nil {
-    os.Stderr.WriteString(err.Error())
+  if _, err := os.Stat(".env"); err == nil {
+    err = godotenv.Load()
+    if err != nil {
+      os.Stderr.WriteString(err.Error())
+    }
   }
   if apigw = os.Getenv("NCR_API_GATEWAY_URL"); apigw == "" {
     apigw = "https://ncr.apigw.ntruss.com"

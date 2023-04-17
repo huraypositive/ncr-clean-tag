@@ -11,9 +11,11 @@ import (
 )
 
 func init() {
-  err := godotenv.Load()
-  if err != nil {
-    os.Stderr.WriteString(err.Error())
+  if _, err := os.Stat(".env"); err == nil {
+    err = godotenv.Load()
+    if err != nil {
+      os.Stderr.WriteString(err.Error())
+    }
   }
 }
 

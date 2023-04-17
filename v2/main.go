@@ -16,6 +16,10 @@ func init() {
 }
 
 func main() {
+	if len(os.Args) < 2 {
+		return
+	}
+
   // version
   if os.Args[1] == "version" || os.Args[1] == "--version" || os.Args[1] == "-v" {
     fmt.Printf("%s version: %s\n", command, version)
