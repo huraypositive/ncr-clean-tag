@@ -43,7 +43,7 @@ func makeApiSpec() *ApiSpec {
 	return &apiSpec
 }
 
-func getFlagConfig(cmd string) *config.Flag {
+func getFlagConfig(cmd ...string) *config.Flag {
 	flagConfig := config.Flag{}
 	flags := flagConfig.Setup(&cmd)
 	flagConfig.Parse(flags, os.Args[2:])

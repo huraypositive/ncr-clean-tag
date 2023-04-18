@@ -21,26 +21,26 @@ func Get() {
 	apiSpec := ApiSpec{}
 	switch os.Args[2] {
 	case "registry":
-		flagConfig := getFlagConfig("registry")
+		flagConfig := getFlagConfig("get","registry")
 		apiSpec.getRegistry(flagConfig)
 	case "image":
 		fallthrough
 	case "images":
 		if len(os.Args) < 4 || (len(os.Args) >= 4 && string([]rune(os.Args[3])[0]) == "-") {
-			flagConfig := getFlagConfig("image")
+			flagConfig := getFlagConfig("get","image")
 			apiSpec.getImages(flagConfig)
 		} else {
-			flagConfig := getFlagConfig("image")
+			flagConfig := getFlagConfig("get","image")
 			apiSpec.getImageDetail(flagConfig)
 		}
 	case "tag":
 		fallthrough
 	case "tags":
 		if len(os.Args) < 4 || (len(os.Args) >= 4 && string([]rune(os.Args[3])[0]) == "-") {
-			flagConfig := getFlagConfig("tag")
+			flagConfig := getFlagConfig("get","tag")
 			apiSpec.getTags(flagConfig)
 		} else {
-			flagConfig := getFlagConfig("tag")
+			flagConfig := getFlagConfig("get","tag")
 			apiSpec.getTagDetail(flagConfig)
 		}
 	}

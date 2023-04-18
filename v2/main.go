@@ -34,8 +34,7 @@ func main() {
 	switch os.Args[1] {
 	case "get":
 		router.Get()
+	case "delete":
+		router.Delete()
 	}
-	// if os.Args[1] == "get" {
-	//   router.Get()
-	// }
 }
