@@ -4,14 +4,19 @@ import (
 	flag "github.com/cornfeedhobo/pflag"
 )
 
-type Flag struct {
+type Flag interface{
+	Setup(*[]string) *flag.FlagSet
+	Parse(*flag.FlagSet,[]string)
+}
+
+type GetFlag struct {
 	Registry  string
 	Image     string
 	Output    string
 	NoHeaders bool
 }
 
-func (f *Flag) Setup(cmd *[]string) *flag.FlagSet {
+func (f *GetFlag) Setup(cmd *[]string) *flag.FlagSet {
 	flags := flag.NewFlagSet("flag", flag.ExitOnError)
 	switch (*cmd)[0] {
 	case "get":
@@ -28,6 +33,6 @@ func (f *Flag) Setup(cmd *[]string) *flag.FlagSet {
 	return flags
 }
 
-func (f *Flag) Parse(flags *flag.FlagSet, args []string) {
+func (f *GetFlag) Parse(flags *flag.FlagSet, args []string) {
 	flags.Parse(args)
 }

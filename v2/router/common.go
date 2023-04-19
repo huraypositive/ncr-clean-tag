@@ -44,10 +44,15 @@ func makeApiSpec() *ApiSpec {
 }
 
 func getFlagConfig(cmd ...string) *config.Flag {
-	flagConfig := config.Flag{}
+	var flagConfig config.Flag
+	switch cmd[0] {
+	case "get":
+	flagConfig = &config.GetFlag{}
 	flags := flagConfig.Setup(&cmd)
 	flagConfig.Parse(flags, os.Args[2:])
 	return &flagConfig
+	}
+	return nil
 }
 
 func sendRequest(apiSpec *ApiSpec) (*[]byte, error) {
