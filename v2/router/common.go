@@ -47,12 +47,15 @@ func getFlagConfig(cmd ...string) *config.Flag {
 	var flagConfig config.Flag
 	switch cmd[0] {
 	case "get":
-	flagConfig = &config.GetFlag{}
-	flags := flagConfig.Setup(&cmd)
-	flagConfig.Parse(flags, os.Args[2:])
-	return &flagConfig
+		flagConfig = &config.GetFlag{}
+		flags := flagConfig.Setup(&cmd)
+		config.FlagParse(flags, os.Args[2:])
+	case "delete":
+		flagConfig = &config.DeleteFlag{}
+		flags := flagConfig.Setup(&cmd)
+		config.FlagParse(flags, os.Args[2:])
 	}
-	return nil
+	return &flagConfig
 }
 
 func sendRequest(apiSpec *ApiSpec) (*[]byte, error) {

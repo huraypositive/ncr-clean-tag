@@ -6,7 +6,7 @@ import (
 
 type Flag interface{
 	Setup(*[]string) *flag.FlagSet
-	Parse(*flag.FlagSet,[]string)
+	// Parse(*flag.FlagSet,[]string)
 }
 
 type GetFlag struct {
@@ -15,6 +15,8 @@ type GetFlag struct {
 	Output    string
 	NoHeaders bool
 }
+
+type DeleteFlag struct {}
 
 func (f *GetFlag) Setup(cmd *[]string) *flag.FlagSet {
 	flags := flag.NewFlagSet("flag", flag.ExitOnError)
@@ -32,7 +34,10 @@ func (f *GetFlag) Setup(cmd *[]string) *flag.FlagSet {
 	}
 	return flags
 }
+func (f *DeleteFlag) Setup(cmd *[]string) *flag.FlagSet {
+	return nil
+}
 
-func (f *GetFlag) Parse(flags *flag.FlagSet, args []string) {
+func FlagParse(flags *flag.FlagSet, args []string) {
 	flags.Parse(args)
 }
