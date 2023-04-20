@@ -11,12 +11,6 @@ import (
 	"strconv"
 )
 
-type Results []interface{}
-type Body struct {
-	Next    int     `json:"next"`
-	Results Results `json:"results"`
-}
-
 func Get() {
 	apiSpec := ApiSpec{}
 	switch os.Args[2] {
@@ -51,7 +45,7 @@ func (apiSpec *ApiSpec) getRegistry(flagConfig *config.GetFlag) {
 	apiSpec.path = "/ncr/api/v2/repositories"
 	apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
 	apiSpec.jsonContent = true
-	data, err := sendRequest(apiSpec)
+	data,_,err := sendRequest(apiSpec)
 	if err != nil {
 		return
 	}
@@ -87,7 +81,7 @@ func (apiSpec *ApiSpec) getImages(flagConfig *config.GetFlag) {
 		apiSpec.path = "/ncr/api/v2/repositories/" + flagConfig.Registry + "?page=" + strconv.Itoa(i)
 		apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
 		apiSpec.jsonContent = true
-		data, err := sendRequest(apiSpec)
+		data,_,err := sendRequest(apiSpec)
 		if err != nil {
 			return
 		}
@@ -129,7 +123,7 @@ func (apiSpec *ApiSpec) getImageDetail(flagConfig *config.GetFlag) {
 	apiSpec.path = "/ncr/api/v2/repositories/" + flagConfig.Registry + "/" + url.QueryEscape(os.Args[3])
 	apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
 	apiSpec.jsonContent = true
-	data, err := sendRequest(apiSpec)
+	data,_,err := sendRequest(apiSpec)
 	if err != nil {
 		return
 	}
@@ -164,7 +158,7 @@ func (apiSpec *ApiSpec) getTags(flagConfig *config.GetFlag) {
 			url.QueryEscape(flagConfig.Image) + "/tags?page=" + strconv.Itoa(i)
 		apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
 		apiSpec.jsonContent = true
-		data, err := sendRequest(apiSpec)
+		data,_,err := sendRequest(apiSpec)
 		if err != nil {
 			return
 		}
@@ -207,7 +201,7 @@ func (apiSpec *ApiSpec) getTagDetail(flagConfig *config.GetFlag) {
 		url.QueryEscape(flagConfig.Image) + "/tags/" + os.Args[3]
 	apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
 	apiSpec.jsonContent = true
-	data, err := sendRequest(apiSpec)
+	data,_,err := sendRequest(apiSpec)
 	if err != nil {
 		return
 	}
