@@ -3,38 +3,39 @@ package router
 import (
 	"encoding/json"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"nct/config"
 	"nct/signature"
 	"net/url"
 	"os"
 	"strconv"
+
+	"gopkg.in/yaml.v3"
 )
 
 func Get() {
 	apiSpec := ApiSpec{}
 	switch os.Args[2] {
 	case "registry":
-		flagConfig := (*getFlagConfig("get","registry")).(*config.GetFlag)
+		flagConfig := (*getFlagConfig("get", "registry")).(*config.GetFlag)
 		apiSpec.getRegistry(flagConfig)
 	case "image":
 		fallthrough
 	case "images":
 		if len(os.Args) < 4 || (len(os.Args) >= 4 && string([]rune(os.Args[3])[0]) == "-") {
-			flagConfig := (*getFlagConfig("get","image")).(*config.GetFlag)
+			flagConfig := (*getFlagConfig("get", "image")).(*config.GetFlag)
 			apiSpec.getImages(flagConfig)
 		} else {
-			flagConfig := (*getFlagConfig("get","image")).(*config.GetFlag)
+			flagConfig := (*getFlagConfig("get", "image")).(*config.GetFlag)
 			apiSpec.getImageDetail(flagConfig)
 		}
 	case "tag":
 		fallthrough
 	case "tags":
 		if len(os.Args) < 4 || (len(os.Args) >= 4 && string([]rune(os.Args[3])[0]) == "-") {
-			flagConfig := (*getFlagConfig("get","tag")).(*config.GetFlag)
+			flagConfig := (*getFlagConfig("get", "tag")).(*config.GetFlag)
 			apiSpec.getTags(flagConfig)
 		} else {
-			flagConfig := (*getFlagConfig("get","tag")).(*config.GetFlag)
+			flagConfig := (*getFlagConfig("get", "tag")).(*config.GetFlag)
 			apiSpec.getTagDetail(flagConfig)
 		}
 	}
@@ -45,7 +46,7 @@ func (apiSpec *ApiSpec) getRegistry(flagConfig *config.GetFlag) {
 	apiSpec.path = "/ncr/api/v2/repositories"
 	apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
 	apiSpec.jsonContent = true
-	data,_,err := sendRequest(apiSpec)
+	data, _, err := sendRequest(apiSpec)
 	if err != nil {
 		return
 	}
@@ -80,8 +81,7 @@ func (apiSpec *ApiSpec) getImages(flagConfig *config.GetFlag) {
 		apiSpec.method = "GET"
 		apiSpec.path = "/ncr/api/v2/repositories/" + flagConfig.Registry + "?page=" + strconv.Itoa(i)
 		apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
-		apiSpec.jsonContent = true
-		data,_,err := sendRequest(apiSpec)
+		data, _, err := sendRequest(apiSpec)
 		if err != nil {
 			return
 		}
@@ -122,8 +122,7 @@ func (apiSpec *ApiSpec) getImageDetail(flagConfig *config.GetFlag) {
 	apiSpec.method = "GET"
 	apiSpec.path = "/ncr/api/v2/repositories/" + flagConfig.Registry + "/" + url.QueryEscape(os.Args[3])
 	apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
-	apiSpec.jsonContent = true
-	data,_,err := sendRequest(apiSpec)
+	data, _, err := sendRequest(apiSpec)
 	if err != nil {
 		return
 	}
@@ -157,8 +156,7 @@ func (apiSpec *ApiSpec) getTags(flagConfig *config.GetFlag) {
 		apiSpec.path = "/ncr/api/v2/repositories/" + flagConfig.Registry + "/" +
 			url.QueryEscape(flagConfig.Image) + "/tags?page=" + strconv.Itoa(i)
 		apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
-		apiSpec.jsonContent = true
-		data,_,err := sendRequest(apiSpec)
+		data, _, err := sendRequest(apiSpec)
 		if err != nil {
 			return
 		}
@@ -200,8 +198,7 @@ func (apiSpec *ApiSpec) getTagDetail(flagConfig *config.GetFlag) {
 	apiSpec.path = "/ncr/api/v2/repositories/" + flagConfig.Registry + "/" +
 		url.QueryEscape(flagConfig.Image) + "/tags/" + os.Args[3]
 	apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
-	apiSpec.jsonContent = true
-	data,_,err := sendRequest(apiSpec)
+	data, _, err := sendRequest(apiSpec)
 	if err != nil {
 		return
 	}

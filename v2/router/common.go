@@ -2,7 +2,6 @@ package router
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"io/ioutil"
 	"nct/config"
 	"net/http"
@@ -10,6 +9,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 var apigw string
@@ -64,7 +65,7 @@ func getFlagConfig(cmd ...string) *config.Flag {
 	return &flagConfig
 }
 
-func sendRequest(apiSpec *ApiSpec) (*[]byte,int,error) {
+func sendRequest(apiSpec *ApiSpec) (*[]byte, int, error) {
 	if apiSpec.jsonContent {
 		(*apiSpec.headers)["Content-Type"] = "application/json; charset=utf-8"
 	}
@@ -81,7 +82,7 @@ func sendRequest(apiSpec *ApiSpec) (*[]byte,int,error) {
 		req, err = http.NewRequest(apiSpec.method, apigw+apiSpec.path, nil)
 	}
 	if err != nil {
-		return nil,0,err
+		return nil, 0, err
 	}
 	for k, v := range *apiSpec.headers {
 		req.Header.Set(k, v)
@@ -89,24 +90,24 @@ func sendRequest(apiSpec *ApiSpec) (*[]byte,int,error) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		return nil,0,err
+		return nil, 0, err
 	}
 	defer res.Body.Close()
 
 	debugMode, err := strconv.ParseBool(debug)
 	if err != nil {
-		return nil,0,err
+		return nil, 0, err
 	}
 	if debugMode {
 		data, err := httputil.DumpResponse(res, true)
 		if err != nil {
-			return nil,0,err
+			return nil, 0, err
 		}
 		fmt.Println(string(data))
 	}
 	data, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil,0,err
+		return nil, 0, err
 	}
-	return &data,res.StatusCode,nil
+	return &data, res.StatusCode, nil
 }
