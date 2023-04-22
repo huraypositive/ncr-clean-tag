@@ -24,14 +24,14 @@ func Delete() {
 		}
 		flagConfig := (*getFlagConfig("delete", "image")).(*config.DeleteFlag)
 		apiSpec.deleteImage(flagConfig)
-	case "tag":
-		fallthrough
-	case "tags":
+	case "tag", "tags":
 		if len(os.Args) < 4 {
 			return
 		}
 		flagConfig := (*getFlagConfig("delete", "tag")).(*config.DeleteFlag)
 		apiSpec.deleteTags(flagConfig)
+	default:
+		fmt.Println(config.DeleteUsage)
 	}
 }
 

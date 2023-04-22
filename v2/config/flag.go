@@ -58,6 +58,10 @@ func (f *GetFlag) Setup(cmd *[]string) *flag.FlagSet {
 	}
 	flags.StringVarP(&f.Output, "output", "o", "", "Available output format:json,yaml")
 	flags.BoolVar(&f.NoHeaders, "no-headers", false, "When using the default or custom-column output format, don't print headers (default print headers).")
+	flags.Usage = func() {
+		fmt.Printf("%s\n\n", GetUsage)
+		flags.PrintDefaults()
+	}
 	return flags
 }
 
@@ -72,6 +76,10 @@ func (f *DeleteFlag) Setup(cmd *[]string) *flag.FlagSet {
 	flags.StringVarP(&f.Registry, "registry", "r", DefaultRegistry, "Registry name")
 	flags.BoolVarP(&f.Yes, "yes", "y", false, "Delete "+(*cmd)[1]+" without asking.")
 	flags.BoolVar(&f.DryRun, "dry-run", false, "Global option. Execute image deletion dry-run.")
+	flags.Usage = func() {
+		fmt.Printf("%s\n\n", DeleteUsage)
+		flags.PrintDefaults()
+	}
 	return flags
 }
 
@@ -85,17 +93,14 @@ func (f *DeleteFlag) GetConfigFromFile() (*[]DeleteConfig, error) {
 
 	filePath, err := filepath.Abs(f.FileName)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	yamlFile, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	err = yaml.Unmarshal(yamlFile, &configs)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	return &configs, nil

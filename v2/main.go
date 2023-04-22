@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"nct/config"
 	"nct/router"
 	"os"
 )
@@ -17,24 +18,26 @@ func init() {
 
 func main() {
 	if len(os.Args) < 2 {
-		return
-	}
-
-	// version
-	if os.Args[1] == "version" || os.Args[1] == "--version" || os.Args[1] == "-v" {
-		fmt.Printf("%s version: %s\n", command, version)
-		return
-	}
-
-	if len(os.Args) < 3 {
-		os.Stderr.WriteString("arg required\n")
+		fmt.Println(config.Usage)
 		os.Exit(2)
 	}
 
 	switch os.Args[1] {
+	case "--help", "-h":
+		fmt.Println(config.Usage)
+	case "version", "--version", "-v":
+		fmt.Printf("%s version: %s\n", command, version)
 	case "get":
+		if len(os.Args) < 3 {
+			fmt.Println(config.GetUsage)
+			return
+		}
 		router.Get()
 	case "delete":
+		if len(os.Args) < 3 {
+			fmt.Println(config.DeleteUsage)
+			return
+		}
 		router.Delete()
 	}
 }

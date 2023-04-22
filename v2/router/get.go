@@ -28,9 +28,7 @@ func Get() {
 			flagConfig := (*getFlagConfig("get", "image")).(*config.GetFlag)
 			apiSpec.getImageDetail(flagConfig)
 		}
-	case "tag":
-		fallthrough
-	case "tags":
+	case "tag", "tags":
 		if len(os.Args) < 4 || (len(os.Args) >= 4 && string([]rune(os.Args[3])[0]) == "-") {
 			flagConfig := (*getFlagConfig("get", "tag")).(*config.GetFlag)
 			apiSpec.getTags(flagConfig)
@@ -38,6 +36,8 @@ func Get() {
 			flagConfig := (*getFlagConfig("get", "tag")).(*config.GetFlag)
 			apiSpec.getTagDetail(flagConfig)
 		}
+	default:
+		fmt.Println(config.GetUsage)
 	}
 }
 
