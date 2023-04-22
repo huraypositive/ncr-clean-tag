@@ -4,3 +4,6 @@
 - image: <image>
   all: yes
   exclude-recent: 1
+- image: <image>
+  all: yes
+  dry-run: true
