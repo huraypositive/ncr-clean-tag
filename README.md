@@ -46,7 +46,7 @@ Examples:
   nct delete tags [-f filePath] [--dry-run] [-y]
 ```
 
-## Delete list file example
+## Delete tag list file example
 ```yaml
 - image: <image>
   tags:
