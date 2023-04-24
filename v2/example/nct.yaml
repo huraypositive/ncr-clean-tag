@@ -1,5 +1,7 @@
-- image: <image>
+- registry: <registry>
+  image: <image>
   tags:
+  - <tag>
   - <tag>
 - image: <image>
   all: yes

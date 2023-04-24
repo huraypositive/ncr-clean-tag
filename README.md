@@ -46,16 +46,77 @@ Examples:
   nct delete tags [-f filePath] [--dry-run] [-y]
 ```
 
-## Delete tag list file example
+## Configmap example
 ```yaml
-- image: <image>
-  tags:
-  - <tag>
-  - <tag>
-- image: <image>
-  all: yes
-  exclude-recent: 1
-- image: <image>
-  all: yes
-  dry-run: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: delete-tag-list
+data:
+  delete-tag-list.yaml: |-
+    ---
+    - registry: <registry>
+      image: <image>
+      tags:
+      - <tag>
+      - <tag>
+    - image: <image>
+      all: yes
+      exclude-recent: 1
+    - image: <image>
+      all: yes
+      dry-run: true
+```
+
+## Secret example
+```yaml
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: ncr-clean-tag
+data:
+  DEFAULT_REGISTRY: <defaultRegistry>
+  NCR_ACCESS_KEY: <accessKey>
+  NCR_SECRET_KEY: <secretKey>
+```
+
+## Cronjob example
+```yaml
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ncr-clean-tag
+spec:
+  schedule: "30 15 * * 0"
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 300
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          containers:
+          - image: nct:v2.0.1
+            name: ncr-clean-tag
+            envFrom:
+            - secretRef:
+                name: ncr-clean-tag
+            args:
+            - delete
+            - tags
+            - -f
+            - /var/run/configmaps/delete-tag-list.yaml
+            - -y
+            volumeMounts:
+            - mountPath: /var/run/configmaps
+              name: delete-tag-list
+              readOnly: true
+          restartPolicy: Never
+          volumes:
+          - configMap:
+              name: delete-tag-list
+            name: delete-tag-list
 ```
