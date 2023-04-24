@@ -32,12 +32,23 @@ func main() {
 			fmt.Println(config.GetUsage)
 			return
 		}
-		router.Get()
+		err := router.Get()
+		if err != nil {
+			handleError(err)
+		}
 	case "delete":
 		if len(os.Args) < 3 {
 			fmt.Println(config.DeleteUsage)
 			return
 		}
-		router.Delete()
+		err := router.Delete()
+		if err != nil {
+			handleError(err)
+		}
 	}
+}
+
+func handleError(err error) {
+	os.Stderr.WriteString(err.Error())
+	os.Exit(2)
 }

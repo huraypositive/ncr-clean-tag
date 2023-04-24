@@ -3,6 +3,7 @@ package router
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"nct/config"
 	"nct/signature"
@@ -13,26 +14,33 @@ import (
 	"strings"
 )
 
-func Delete() {
+func Delete() error {
 	apiSpec := ApiSpec{}
 	switch os.Args[2] {
-	case "image":
-		fallthrough
-	case "images":
+	case "image", "images":
 		if len(os.Args) < 4 || (os.Args[3] != "-h" && os.Args[3] != "--help" && string([]rune(os.Args[3])[0]) == "-") {
-			return
+			fmt.Println(config.DeleteUsage)
+			return nil
 		}
 		flagConfig := (*getFlagConfig("delete", "image")).(*config.DeleteFlag)
-		apiSpec.deleteImage(flagConfig)
+		err := apiSpec.deleteImage(flagConfig)
+		if err != nil {
+			return err
+		}
 	case "tag", "tags":
 		if len(os.Args) < 4 {
-			return
+			fmt.Println(config.DeleteUsage)
+			return nil
 		}
 		flagConfig := (*getFlagConfig("delete", "tag")).(*config.DeleteFlag)
-		apiSpec.deleteTags(flagConfig)
+		err := apiSpec.deleteTags(flagConfig)
+		if err != nil {
+			return err
+		}
 	default:
 		fmt.Println(config.DeleteUsage)
 	}
+	return nil
 }
 
 func confirmDelete(flagConfig *config.DeleteFlag) {
@@ -59,13 +67,13 @@ func confirmDelete(flagConfig *config.DeleteFlag) {
 	}
 }
 
-func (apiSpec *ApiSpec) deleteImage(flagConfig *config.DeleteFlag) {
+func (apiSpec *ApiSpec) deleteImage(flagConfig *config.DeleteFlag) error {
 	if confirmDelete(flagConfig); !flagConfig.Yes {
-		return
+		return nil
 	}
 	if flagConfig.DryRun {
 		fmt.Println(flagConfig.Registry + "/" + os.Args[3] + " image deleted. - Dry run")
-		return
+		return nil
 	}
 
 	apiSpec.method = "DELETE"
@@ -74,26 +82,27 @@ func (apiSpec *ApiSpec) deleteImage(flagConfig *config.DeleteFlag) {
 	body, status, err := sendRequest(apiSpec)
 	if err != nil {
 		os.Stderr.WriteString(err.Error())
-		return
+		return err
 	}
 	if status == 204 {
 		fmt.Println(flagConfig.Registry + "/" + os.Args[3] + " image successfully deleted.")
+		return nil
 	} else if status == 500 {
-		os.Stderr.WriteString(flagConfig.Registry + "/" + os.Args[3] + " image not exists.\n")
+		return errors.New(flagConfig.Registry + "/" + os.Args[3] + " image not exists.\n")
 	} else {
-		os.Stderr.WriteString(string(*body))
+		return errors.New(string(*body))
 	}
 }
 
-func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) {
+func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) error {
 	if confirmDelete(flagConfig); !flagConfig.Yes {
-		return
+		return nil
 	}
 	apiSpec.method = "DELETE"
 	if flagConfig.FileName != "" {
 		configs, err := flagConfig.GetConfigFromFile()
 		if err != nil {
-			return
+			return err
 		}
 		for i := range *configs {
 			if (*configs)[i].Recent < 0 {
@@ -108,19 +117,27 @@ func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) {
 			}
 			if !(*configs)[i].Enable {
 				for j := range (*configs)[i].Tags {
-					deleteTag(apiSpec, &(*configs)[i].DryRun, &(*configs)[i].Registry, &(*configs)[i].Image, (*configs)[i].Tags[j])
+					err := deleteTag(apiSpec, &(*configs)[i].DryRun, &(*configs)[i].Registry, &(*configs)[i].Image, (*configs)[i].Tags[j])
+					if err != nil {
+						return err
+					}
 				}
 			} else {
-				results := getDeleteList(&(*configs)[i].Registry, &(*configs)[i].Image, &(*configs)[i].Recent)
+				results, err := getDeleteList(&(*configs)[i].Registry, &(*configs)[i].Image, &(*configs)[i].Recent)
+				if err != nil {
+					return err
+				}
 				for j := 0 + (*configs)[i].Recent; j < len(results); j++ {
-					deleteTag(apiSpec, &(*configs)[i].DryRun, &(*configs)[i].Registry, &(*configs)[i].Image, fmt.Sprintf("%s", results[j].(map[string]interface{})["name"]))
+					err := deleteTag(apiSpec, &(*configs)[i].DryRun, &(*configs)[i].Registry, &(*configs)[i].Image, fmt.Sprintf("%s", results[j].(map[string]interface{})["name"]))
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
 	} else {
 		if flagConfig.Image == "" {
-			os.Stderr.WriteString("You must insert the image name.\n")
-			return
+			return errors.New("You must insert the image name.\n")
 		}
 		if !flagConfig.Enable {
 			index := len(os.Args[3:])
@@ -135,18 +152,28 @@ func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) {
 				tags[i] = v
 			}
 			for i := range tags {
-				deleteTag(apiSpec, &flagConfig.DryRun, &flagConfig.Registry, &flagConfig.Image, tags[i])
+				err := deleteTag(apiSpec, &flagConfig.DryRun, &flagConfig.Registry, &flagConfig.Image, tags[i])
+				if err != nil {
+					return err
+				}
 			}
 		} else {
-			results := getDeleteList(&flagConfig.Registry, &flagConfig.Image, &flagConfig.Recent)
+			results, err := getDeleteList(&flagConfig.Registry, &flagConfig.Image, &flagConfig.Recent)
+			if err != nil {
+				return err
+			}
 			for j := 0 + flagConfig.Recent; j < len(results); j++ {
-				deleteTag(apiSpec, &flagConfig.DryRun, &flagConfig.Registry, &flagConfig.Image, fmt.Sprintf("%s", results[j].(map[string]interface{})["name"]))
+				err := deleteTag(apiSpec, &flagConfig.DryRun, &flagConfig.Registry, &flagConfig.Image, fmt.Sprintf("%s", results[j].(map[string]interface{})["name"]))
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
+	return nil
 }
 
-func getDeleteList(registry *string, image *string, recent *int) Results {
+func getDeleteList(registry *string, image *string, recent *int) (Results, error) {
 	apiSpec := ApiSpec{}
 	apiSpec.method = "GET"
 	var results Results
@@ -156,11 +183,13 @@ func getDeleteList(registry *string, image *string, recent *int) Results {
 		apiSpec.headers = signature.GetHeader(&apiSpec.method, &apiSpec.path)
 		data, _, err := sendRequest(&apiSpec)
 		if err != nil {
-			os.Stderr.WriteString(err.Error())
-			continue
+			return nil, err
 		}
 		var body Body
 		err = json.Unmarshal(*data, &body)
+		if err != nil {
+			return nil, err
+		}
 		for _, v := range body.Results {
 			results = append(results, v)
 		}
@@ -169,21 +198,20 @@ func getDeleteList(registry *string, image *string, recent *int) Results {
 		}
 	}
 	if len(results) <= *recent {
-		os.Stderr.WriteString("The " + *image + " image contains fewer tags than exclude-recent. - Skipping\n")
-		return nil
+		return nil, errors.New("The " + *image + " image contains fewer tags than exclude-recent. - Skipping\n")
 	}
 	sort.Slice(results, func(i, j int) bool {
 		now, _ := strconv.Atoi(strings.Split(fmt.Sprintf("%f", results[i].(map[string]interface{})["last_updated"]), ".")[0])
 		next, _ := strconv.Atoi(strings.Split(fmt.Sprintf("%f", results[j].(map[string]interface{})["last_updated"]), ".")[0])
 		return now > next
 	})
-	return results
+	return results, nil
 }
 
-func deleteTag(apiSpec *ApiSpec, dryRun *bool, registry *string, image *string, tag string) {
+func deleteTag(apiSpec *ApiSpec, dryRun *bool, registry *string, image *string, tag string) error {
 	if *dryRun {
 		fmt.Println(*registry + "/" + *image + ":" + tag + " deleted. - Dry run")
-		return
+		return nil
 	}
 	apiSpec.path = "/ncr/api/v2/repositories/" + *registry + "/" +
 		url.QueryEscape(*image) + "/tags/" + tag
@@ -191,11 +219,12 @@ func deleteTag(apiSpec *ApiSpec, dryRun *bool, registry *string, image *string, 
 	_, status, err := sendRequest(apiSpec)
 	if err != nil {
 		os.Stderr.WriteString(err.Error())
-		return
+		return err
 	}
 	if status == 204 {
 		fmt.Println(*registry + "/" + *image + ":" + tag + " successfully deleted.")
+		return nil
 	} else {
-		os.Stderr.WriteString(*registry + "/" + *image + ":" + tag + " not exists.\n")
+		return errors.New(*registry + "/" + *image + ":" + tag + " not exists.\n")
 	}
 }

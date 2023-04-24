@@ -2,7 +2,11 @@ COMMAND=nct
 GIT_VER=$(shell git describe --tags)
 .DEFAULT_GOAL := build
 
-fmt:
+imports:
+	goimports -l -w .
+.PHONY:imports
+
+fmt: imports
 	go fmt ./...
 .PHONY:fmt
 

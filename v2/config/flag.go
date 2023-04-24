@@ -39,9 +39,11 @@ type DeleteFlag struct {
 }
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		os.Stderr.WriteString(err.Error())
+	if _, err := os.Stat(".env"); err == nil {
+		err = godotenv.Load()
+		if err != nil {
+			os.Stderr.WriteString(err.Error())
+		}
 	}
 	if os.Getenv("DEFAULT_REGISTRY") != "" {
 		DefaultRegistry = os.Getenv("DEFAULT_REGISTRY")

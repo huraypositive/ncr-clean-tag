@@ -1,0 +1,12 @@
+---
+version: '3'
+
+services:
+  nct:
+    build:
+      context: v2
+      dockerfile: Dockerfile
+      args:
+        COMMAND: ${COMMAND}
+        GIT_VER: ${GIT_VER}
+    image: huray-nks-container-registry.kr.ncr.ntruss.com/devops/nct:${GIT_VER:-latest}
