@@ -40,10 +40,10 @@ Examples:
   nct delete image [-r registry] [--dry-run] [-y]
   
   # Delete tags
-  nct delete tag [...tagName] -i imageName [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
-  nct delete tags [...tagName] -i imageName [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
-  nct delete tags [--all] [--exclude-recent number] [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
-  nct delete tags [-f filePath] [--exclude-recent number] [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
+  nct delete tag tagName -i imageName [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
+  nct delete tags tagName1 tagName2 -i imageName [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
+  nct delete tags --all -i imageName  [--exclude-recent number] [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
+  nct delete tags -f filePath [--exclude-recent number] [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
 ```
 
 ## Configmap example
