@@ -11,7 +11,7 @@ nct version
 # Get Registry or Image or Tag list from NCR
 nct get [registry|images|tags]
 
-# Example:
+# Examples:
   # Get registry list
   nct get registry
 
@@ -35,7 +35,7 @@ nct get [registry|images|tags]
 # Delete Image or Tags from NCR
 nct delete [image|tags]
 
-Examples:
+# Examples:
   # Delete image
   nct delete image [-r registry] [--dry-run] [-y]
   
