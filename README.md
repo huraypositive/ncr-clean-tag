@@ -1,6 +1,13 @@
 # NCT - NCR Clean Tag
 A tool for using the NCloud Container Registry API
 
+## ENV
+```sh
+export DEFAULT_REGISTRY="<to set default NCloud container registry>"
+export NCR_ACCESS_KEY="<api access key>"
+export NCR_SECRET_KEY="<api secret key>"
+```
+
 ## Version
 ```sh
 nct version
