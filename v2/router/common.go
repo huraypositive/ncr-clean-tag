@@ -56,11 +56,11 @@ func getFlagConfig(cmd ...string) *config.Flag {
 	case "get":
 		flagConfig = &config.GetFlag{}
 		flags := flagConfig.Setup(&cmd)
-		config.FlagParse(flags, os.Args[2:])
+		flagConfig.Parse(flags, os.Args[2:])
 	case "delete":
 		flagConfig = &config.DeleteFlag{}
 		flags := flagConfig.Setup(&cmd)
-		config.FlagParse(flags, os.Args[2:])
+		flagConfig.Parse(flags, os.Args[2:])
 	}
 	return &flagConfig
 }

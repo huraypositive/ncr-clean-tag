@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	flag "github.com/cornfeedhobo/pflag"
 	"github.com/joho/godotenv"
@@ -12,9 +13,14 @@ import (
 )
 
 var DefaultRegistry string = "huray-nks-container-registry"
+var excludeTags *string
+const excludeTagsUsage = `exclude tag list
+seperate by comma
+  ex: tag1,tag2,...`
 
 type Flag interface {
 	Setup(*[]string) *flag.FlagSet
+	Parse(*flag.FlagSet, []string)
 }
 
 type GetFlag struct {
@@ -25,12 +31,13 @@ type GetFlag struct {
 }
 
 type DeleteConfig struct {
-	Registry string   `yaml:"registry"`
-	Image    string   `yaml:"image"`
-	Tags     []string `yaml:"tags"`
-	DryRun   bool     `yaml:"dry-run"`
-	Enable   bool     `yaml:"all"`
-	Recent   int      `yaml:"exclude-recent"`
+	Registry      string   `yaml:"registry"`
+	Image         string   `yaml:"image"`
+	Tags          []string `yaml:"tags"`
+	ExcludeTags   []string `yaml:"exclude-tags"`
+	ExcludeRecent int      `yaml:"exclude-recent"`
+	DryRun        bool     `yaml:"dry-run"`
+	Enable        bool     `yaml:"all"`
 }
 type DeleteFlag struct {
 	DeleteConfig
@@ -73,11 +80,12 @@ func (f *DeleteFlag) Setup(cmd *[]string) *flag.FlagSet {
 		flags.StringVarP(&f.FileName, "filename", "f", "", "The files that contain the configurations to apply")
 		flags.StringVarP(&f.Image, "image", "i", "", "Image name")
 		flags.BoolVar(&f.Enable, "all", false, "Delete all tags")
-		flags.IntVar(&f.Recent, "exclude-recent", 0, "The number of recent tags to be excluded from deletion, only works when --all is true")
+		flags.IntVar(&f.ExcludeRecent, "exclude-recent", 0, "The number of recent tags to be excluded from deletion, only works when --all is true")
 	}
 	flags.StringVarP(&f.Registry, "registry", "r", DefaultRegistry, "Registry name")
 	flags.BoolVarP(&f.Yes, "yes", "y", false, "Delete "+(*cmd)[1]+" without asking.")
 	flags.BoolVar(&f.DryRun, "dry-run", false, "Global option. Execute image deletion dry-run.")
+	excludeTags = flags.String("exclude-tags","",excludeTagsUsage)
 	flags.Usage = func() {
 		fmt.Printf("%s\n\n", DeleteUsage)
 		flags.PrintDefaults()
@@ -85,8 +93,14 @@ func (f *DeleteFlag) Setup(cmd *[]string) *flag.FlagSet {
 	return flags
 }
 
-func FlagParse(flags *flag.FlagSet, args []string) {
+func (f *GetFlag) Parse(flags *flag.FlagSet, args []string) {
 	flags.Parse(args)
+}
+func (f *DeleteFlag) Parse(flags *flag.FlagSet, args []string) {
+	flags.Parse(args)
+	if *excludeTags != "" {
+		f.ExcludeTags = strings.Split(*excludeTags, ",")
+	}
 }
 
 func (f *DeleteFlag) GetConfigFromFile() (*[]DeleteConfig, error) {

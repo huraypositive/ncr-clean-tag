@@ -5,7 +5,12 @@
   - <tag>
 - image: <image>
   all: yes
-  exclude-recent: 1
-- image: <image>
-  all: yes
-  dry-run: true
+  exclude-tags:
+  - v1.12312
+  - v1.12312
+  - v1.12312
+  - v1.12312
+  # exclude-recent: 1
+# - image: <image>
+#   all: yes
+#   dry-run: true

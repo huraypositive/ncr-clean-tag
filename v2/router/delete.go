@@ -105,13 +105,18 @@ func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) error {
 			return err
 		}
 		for i := range *configs {
-			if (*configs)[i].Recent < 0 {
+			if (*configs)[i].ExcludeRecent < 0 {
 				os.Stderr.WriteString("exclude-recent must be greater than or equal to zero. (Image:" + (*configs)[i].Image + ")\n")
 				continue
 			}
 			if (*configs)[i].Registry == "" {
 				(*configs)[i].Registry = config.DefaultRegistry
 			}
+			// if len((*configs)[i].ExcludeTags) == 0 && len(flagConfig.ExcludeTags) != 0 {
+			// 	(*configs)[i].ExcludeTags = flagConfig.ExcludeTags
+			// }
+			// fmt.Println((*configs)[i].ExcludeTags)
+			// fmt.Println(flagConfig.ExcludeTags)
 			if flagConfig.DryRun {
 				(*configs)[i].DryRun = flagConfig.DryRun
 			}
@@ -123,11 +128,11 @@ func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) error {
 					}
 				}
 			} else {
-				results, err := getDeleteList(&(*configs)[i].Registry, &(*configs)[i].Image, &(*configs)[i].Recent)
+				results, err := getDeleteList(&(*configs)[i].Registry, &(*configs)[i].Image, &(*configs)[i].ExcludeRecent)
 				if err != nil {
 					return err
 				}
-				for j := 0 + (*configs)[i].Recent; j < len(results); j++ {
+				for j := 0 + (*configs)[i].ExcludeRecent; j < len(results); j++ {
 					err := deleteTag(apiSpec, &(*configs)[i].DryRun, &(*configs)[i].Registry, &(*configs)[i].Image, fmt.Sprintf("%s", results[j].(map[string]interface{})["name"]))
 					if err != nil {
 						return err
@@ -158,11 +163,11 @@ func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) error {
 				}
 			}
 		} else {
-			results, err := getDeleteList(&flagConfig.Registry, &flagConfig.Image, &flagConfig.Recent)
+			results, err := getDeleteList(&flagConfig.Registry, &flagConfig.Image, &flagConfig.ExcludeRecent)
 			if err != nil {
 				return err
 			}
-			for j := 0 + flagConfig.Recent; j < len(results); j++ {
+			for j := 0 + flagConfig.ExcludeRecent; j < len(results); j++ {
 				err := deleteTag(apiSpec, &flagConfig.DryRun, &flagConfig.Registry, &flagConfig.Image, fmt.Sprintf("%s", results[j].(map[string]interface{})["name"]))
 				if err != nil {
 					return err
@@ -188,7 +193,7 @@ func getDeleteList(registry *string, image *string, recent *int) (Results, error
 		var body Body
 		err = json.Unmarshal(*data, &body)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("An error occurred parsing the response body. %s\n", err)
 		}
 		for _, v := range body.Results {
 			results = append(results, v)
