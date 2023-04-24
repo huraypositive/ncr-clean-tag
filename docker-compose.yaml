@@ -10,3 +10,5 @@ services:
         COMMAND: ${COMMAND}
         GIT_VER: ${GIT_VER}
     image: ${CONTAINER_REGISTRY}/devops/nct:${GIT_VER:-latest}
+    volumes:
+    - ${PWD}/v2/example/nct.yaml:/var/run/configmaps/delete-tag-list.yaml

@@ -198,7 +198,8 @@ func getDeleteList(registry *string, image *string, recent *int) (Results, error
 		}
 	}
 	if len(results) <= *recent {
-		return nil, errors.New("The " + *image + " image contains fewer tags than exclude-recent. - Skipping\n")
+		os.Stderr.WriteString("The " + *image + " image contains fewer tags than exclude-recent. - Skipping\n")
+		return nil, nil
 	}
 	sort.Slice(results, func(i, j int) bool {
 		now, _ := strconv.Atoi(strings.Split(fmt.Sprintf("%f", results[i].(map[string]interface{})["last_updated"]), ".")[0])
