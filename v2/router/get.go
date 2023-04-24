@@ -222,6 +222,9 @@ func (apiSpec *ApiSpec) getTags(flagConfig *config.GetFlag) error {
 }
 
 func (apiSpec *ApiSpec) getTagDetail(flagConfig *config.GetFlag) error {
+	if flagConfig.Image == "" {
+		return errors.New("You must insert the image name.\n")
+	}
 	apiSpec.method = "GET"
 	apiSpec.path = "/ncr/api/v2/repositories/" + flagConfig.Registry + "/" +
 		url.QueryEscape(flagConfig.Image) + "/tags/" + os.Args[3]
