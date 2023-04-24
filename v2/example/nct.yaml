@@ -1,16 +1,25 @@
-- registry: <registry>
+---
+- registry: <registry> # -r flag or DEFAULT_REGISTRY env can be used instead.
   image: <image>
   tags:
   - <tag>
   - <tag>
 - image: <image>
-  all: yes
+  all: true
+  dry-run: true
+- image: <image>
+  all: true
+  exclude-recent: 1
+- image: <image>
+  all: true
   exclude-tags:
-  - v1.12312
-  - v1.12312
-  - v1.12312
-  - v1.12312
-  # exclude-recent: 1
-# - image: <image>
-#   all: yes
-#   dry-run: true
+  - <excludeTag>
+  - <excludeTag>
+- registry: <registry>
+  image: <image>
+  all: true
+  exclude-recent: 5
+  exclude-tags:
+  - <excludeTag>
+  - <excludeTag>
+  dry-run: true

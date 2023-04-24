@@ -40,10 +40,10 @@ Examples:
   nct delete image [-r registry] [--dry-run] [-y]
   
   # Delete tags
-  nct delete tag [...tagName] -i imageName [-r registry] [--dry-run] [-y]
-  nct delete tags [...tagName] -i imageName [-r registry] [--dry-run] [-y]
-  nct delete tags [--all] [--exclude-recent number] [-r registry] [--dry-run] [-y]
-  nct delete tags [-f filePath] [--dry-run] [-y]
+  nct delete tag [...tagName] -i imageName [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
+  nct delete tags [...tagName] -i imageName [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
+  nct delete tags [--all] [--exclude-recent number] [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
+  nct delete tags [-f filePath] [--exclude-recent number] [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
 ```
 
 ## Configmap example
@@ -56,16 +56,29 @@ metadata:
 data:
   delete-tag-list.yaml: |-
     ---
-    - registry: <registry>
+    - registry: <registry> # -r flag or DEFAULT_REGISTRY env can be used instead.
       image: <image>
       tags:
       - <tag>
       - <tag>
     - image: <image>
       all: yes
+      dry-run: true
+    - image: <image>
+      all: yes
       exclude-recent: 1
     - image: <image>
       all: yes
+      exclude-tags:
+      - <excludeTag>
+      - <excludeTag>
+    - registry: <registry>
+      image: <image>
+      all: yes
+      exclude-recent: 5
+      exclude-tags:
+      - <excludeTag>
+      - <excludeTag>
       dry-run: true
 ```
 
@@ -98,6 +111,7 @@ spec:
       ttlSecondsAfterFinished: 86400
       template:
         spec:
+          restartPolicy: Never
           containers:
           - image: nct:v2.0.1
             name: ncr-clean-tag
@@ -114,7 +128,6 @@ spec:
             - mountPath: /var/run/configmaps
               name: delete-tag-list
               readOnly: true
-          restartPolicy: Never
           volumes:
           - configMap:
               name: delete-tag-list

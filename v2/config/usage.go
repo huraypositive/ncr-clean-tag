@@ -10,6 +10,10 @@ var Usage string
 var GetUsage string
 var DeleteUsage string
 
+const excludeTagsUsage = `exclude tag list
+seperate by comma
+  ex: tag1,tag2,...`
+
 func init() {
 	if command == "" {
 		command = "nct"
@@ -53,8 +57,8 @@ Examples:
   %s delete image [-r registry] [--dry-run] [-y]
   
   # Delete tags
-  %s delete tag [...tagName] -i imageName [-r registry] [--dry-run] [-y]
-  %s delete tags [...tagName] -i imageName [-r registry] [--dry-run] [-y]
-  %s delete tags [--all] [--exclude-recent number] [-r registry] [--dry-run] [-y]
-  %s delete tags [-f filePath] [--dry-run] [-y]`, command, command, command, command, command)
+  %s delete tag [...tagName] -i imageName [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
+  %s delete tags [...tagName] -i imageName [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
+  %s delete tags [--all] [--exclude-recent number] [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]
+  %s delete tags [-f filePath] [--exclude-recent number] [--exclude-tags=tag1,tag2,...] [-r registry] [--dry-run] [-y]`, command, command, command, command, command)
 }

@@ -110,19 +110,27 @@ func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) error {
 				continue
 			}
 			if (*configs)[i].Registry == "" {
-				(*configs)[i].Registry = config.DefaultRegistry
+				if flagConfig.Registry != "" {
+					(*configs)[i].Registry = flagConfig.Registry
+				} else {
+					(*configs)[i].Registry = config.DefaultRegistry
+				}
 			}
-			// if len((*configs)[i].ExcludeTags) == 0 && len(flagConfig.ExcludeTags) != 0 {
-			// 	(*configs)[i].ExcludeTags = flagConfig.ExcludeTags
-			// }
-			// fmt.Println((*configs)[i].ExcludeTags)
-			// fmt.Println(flagConfig.ExcludeTags)
+			if len((*configs)[i].ExcludeTags) == 0 && len(flagConfig.ExcludeTags) != 0 {
+				(*configs)[i].ExcludeTags = flagConfig.ExcludeTags
+			}
+			if (*configs)[i].ExcludeRecent == 0 && flagConfig.ExcludeRecent != 0 {
+				(*configs)[i].ExcludeRecent = flagConfig.ExcludeRecent
+			}
 			if flagConfig.DryRun {
 				(*configs)[i].DryRun = flagConfig.DryRun
 			}
 			if !(*configs)[i].Enable {
+				if len((*configs)[i].Tags) == 0 {
+					return errors.New("There is no list of delete tags. To delete all, use the 'all: true' option.\n")
+				}
 				for j := range (*configs)[i].Tags {
-					err := deleteTag(apiSpec, &(*configs)[i].DryRun, &(*configs)[i].Registry, &(*configs)[i].Image, (*configs)[i].Tags[j])
+					err := deleteTag(apiSpec, &(*configs)[i].DryRun, &(*configs)[i].Registry, &(*configs)[i].Image, (*configs)[i].Tags[j], &(*configs)[i].ExcludeTags)
 					if err != nil {
 						return err
 					}
@@ -133,7 +141,7 @@ func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) error {
 					return err
 				}
 				for j := 0 + (*configs)[i].ExcludeRecent; j < len(results); j++ {
-					err := deleteTag(apiSpec, &(*configs)[i].DryRun, &(*configs)[i].Registry, &(*configs)[i].Image, fmt.Sprintf("%s", results[j].(map[string]interface{})["name"]))
+					err := deleteTag(apiSpec, &(*configs)[i].DryRun, &(*configs)[i].Registry, &(*configs)[i].Image, fmt.Sprintf("%s", results[j].(map[string]interface{})["name"]), &(*configs)[i].ExcludeTags)
 					if err != nil {
 						return err
 					}
@@ -156,8 +164,11 @@ func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) error {
 			for i, v := range os.Args[3 : index+3] {
 				tags[i] = v
 			}
+			if len(tags) == 0 {
+				return errors.New("There is no list of delete tags. To delete all, use the '--all' option.\n")
+			}
 			for i := range tags {
-				err := deleteTag(apiSpec, &flagConfig.DryRun, &flagConfig.Registry, &flagConfig.Image, tags[i])
+				err := deleteTag(apiSpec, &flagConfig.DryRun, &flagConfig.Registry, &flagConfig.Image, tags[i], &flagConfig.ExcludeTags)
 				if err != nil {
 					return err
 				}
@@ -168,7 +179,7 @@ func (apiSpec *ApiSpec) deleteTags(flagConfig *config.DeleteFlag) error {
 				return err
 			}
 			for j := 0 + flagConfig.ExcludeRecent; j < len(results); j++ {
-				err := deleteTag(apiSpec, &flagConfig.DryRun, &flagConfig.Registry, &flagConfig.Image, fmt.Sprintf("%s", results[j].(map[string]interface{})["name"]))
+				err := deleteTag(apiSpec, &flagConfig.DryRun, &flagConfig.Registry, &flagConfig.Image, fmt.Sprintf("%s", results[j].(map[string]interface{})["name"]), &flagConfig.ExcludeTags)
 				if err != nil {
 					return err
 				}
@@ -203,7 +214,7 @@ func getDeleteList(registry *string, image *string, recent *int) (Results, error
 		}
 	}
 	if len(results) <= *recent {
-		os.Stderr.WriteString("The " + *image + " image contains fewer tags than exclude-recent. - Skipping\n")
+		os.Stderr.WriteString("The " + *registry + "/" + *image + " image contains fewer tags than exclude-recent. - Skipping\n")
 		return nil, nil
 	}
 	sort.Slice(results, func(i, j int) bool {
@@ -214,7 +225,13 @@ func getDeleteList(registry *string, image *string, recent *int) (Results, error
 	return results, nil
 }
 
-func deleteTag(apiSpec *ApiSpec, dryRun *bool, registry *string, image *string, tag string) error {
+func deleteTag(apiSpec *ApiSpec, dryRun *bool, registry *string, image *string, tag string, excludeTags *[]string) error {
+	for i := range *excludeTags {
+		if tag == (*excludeTags)[i] {
+			fmt.Println("The " + tag + " tag is included in the exclude tag list. - Skipping")
+			return nil
+		}
+	}
 	if *dryRun {
 		fmt.Println(*registry + "/" + *image + ":" + tag + " deleted. - Dry run")
 		return nil

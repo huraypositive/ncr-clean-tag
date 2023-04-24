@@ -14,9 +14,6 @@ import (
 
 var DefaultRegistry string = "huray-nks-container-registry"
 var excludeTags *string
-const excludeTagsUsage = `exclude tag list
-seperate by comma
-  ex: tag1,tag2,...`
 
 type Flag interface {
 	Setup(*[]string) *flag.FlagSet
@@ -85,7 +82,7 @@ func (f *DeleteFlag) Setup(cmd *[]string) *flag.FlagSet {
 	flags.StringVarP(&f.Registry, "registry", "r", DefaultRegistry, "Registry name")
 	flags.BoolVarP(&f.Yes, "yes", "y", false, "Delete "+(*cmd)[1]+" without asking.")
 	flags.BoolVar(&f.DryRun, "dry-run", false, "Global option. Execute image deletion dry-run.")
-	excludeTags = flags.String("exclude-tags","",excludeTagsUsage)
+	excludeTags = flags.String("exclude-tags", "", excludeTagsUsage)
 	flags.Usage = func() {
 		fmt.Printf("%s\n\n", DeleteUsage)
 		flags.PrintDefaults()
