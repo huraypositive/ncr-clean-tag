@@ -1,6 +1,13 @@
 # NCT - NCR Clean Tag
 A tool for using the NCloud Container Registry API
 
+## Build
+1. [Install go](https://go.dev/doc/install)
+2. Build container image with docker file
+```sh
+docker build -t <tag>:<version> v2/
+```
+
 ## ENV
 ```sh
 export DEFAULT_REGISTRY="<to set default NCloud container registry>"
